@@ -1,33 +1,70 @@
-# Seedess .NET SDK
+# Seedess.Sdk
 
-Official .NET client for the [Seedess API](https://seedess.com/docs/api/).
+Official Seedess SDK for .NET.
 
-> **Status:** planned for `0.1.0`. The API contract is live; this client is next.
+**Server-side only.** The SDK uses a secret API key (`key_…`) to create and control streams.
+Never ship it in a browser or a mobile app. Playback uses the separate `@seedess/*-p2p`
+packages and a per-stream public token (`pk_…`).
 
-## What it covers
-
-- create and refresh streams
-- read offload, CDN and P2P metrics
-- send per-session telemetry
-- manage server-side API keys and per-stream public tokens
-
-## Install (planned)
+## Install
 
 ```bash
-dotnet add package Seedess
+dotnet add package Seedess.Sdk
 ```
 
-## Contract
+.NET 8+ (built for .NET 10 in this repository).
 
-Generated from `contracts/api.json` in the Seedess monorepo and checked against the same
-JSON Schemas. See the [API reference](https://seedess.com/docs/api/) and
-[Libraries](https://seedess.com/docs/libraries/).
+## Use
+
+```csharp
+using Seedess;
+
+var seedess = new SeedessClient(Environment.GetEnvironmentVariable("SEEDESS_API_KEY")!);
+
+var stream = await seedess.CreateStreamAsync(new CreateStreamInput(
+    "https://origin.example/master.m3u8",
+    Id: "demo",
+    Live: true));
+
+Console.WriteLine(stream.PublicToken);
+Console.WriteLine(stream.Playback?.Master);
+```
+
+Pass only the public token and stream id to the page.
+
+## Methods
+
+| Method | HTTP | Purpose |
+| --- | --- | --- |
+| `CreateStreamAsync(CreateStreamInput)` | `POST /api/v1/streams` | Ingest a manifest, mint the public token. |
+| `GetStreamAsync(id)` | `GET /api/v1/streams/:id` | Status, variants, segment count. |
+| `ListStreamsAsync()` | `GET /api/v1/streams` | All streams in the tenant. |
+| `RefreshStreamAsync(id)` | `POST /api/v1/streams/:id/refresh` | Pull new live segments. |
+| `DisablePeersAsync(id)` | `POST /api/v1/streams/:id/kill` | CDN only; playback continues. |
+| `EnablePeersAsync(id)` | `POST /api/v1/streams/:id/revive` | Re-enable peer delivery. |
+| `GetMetricsAsync(id)` | `GET /api/v1/streams/:id/metrics` | Offload and delivery counters. |
+| `SendTelemetryAsync(TelemetryInput)` | `POST /api/v1/telemetry` | One session batch (public, rate limited). |
+
+`RequestAsync(method, path, body, auth)` returns the raw `JsonElement`.
+
+## Errors
+
+```csharp
+try
+{
+    await seedess.CreateStreamAsync(new CreateStreamInput(url));
+}
+catch (SeedessException error)
+{
+    Console.WriteLine($"{error.Status} {error.ErrorCode} {error.Message}");
+}
+```
 
 ## Links
 
 - Docs: https://seedess.com/docs/
 - API: https://seedess.com/docs/api/
-- Issues: https://github.com/Seedess/dotnet/issues
+- Libraries: https://seedess.com/docs/libraries/
 
 ## License
 

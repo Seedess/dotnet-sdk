@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Seedess.Sdk</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Seedess</Authors>
+    <Description>Official Seedess SDK for .NET. Create streams, mint playback tokens, read offload metrics.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://seedess.com/docs/libraries/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Seedess/dotnet-sdk</RepositoryUrl>
+    <PackageTags>seedess;sdk;video;streaming;p2p;api</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="tests/**" />
+  </ItemGroup>
+</Project>
